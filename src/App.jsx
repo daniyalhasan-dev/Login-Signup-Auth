@@ -1,21 +1,40 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react'
+import { auth } from './Firebase/firebase'
 import LoginForm from './components/Login/login'
 import SignupForm from './components/Signup/signup'
+import { onAuthStateChanged } from 'firebase/auth'
+import { signOut } from 'firebase/auth'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, setUser] = useState(null);
+
+  useEffect(()=>{
+    const unsubscribe = onAuthStateChanged(auth , (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = () => {
+    signOut(auth);
+  };
 
   return (
-    <>
-      <div className="min-h-screen bg-black flex items-center justify-center">
       <div>
-        <LoginForm />
+        <h1>React Firebase Auth</h1>
+        {user ? (
+          <>
+          <p>Welcome, {user.email}</p>
+          <button onClick={handleLogout}>Logout</button>
+          </>
+        ) : (
+          <>
+          <SignupForm/>
+          <hr/>
+          <LoginForm/>
+          </>
+        )}
       </div>
-    </div>
-    </>
   )
 }
 
